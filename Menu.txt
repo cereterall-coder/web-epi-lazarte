@@ -1,0 +1,11 @@
+1.Sala Situacional OIS,Link:https://flipbookpdf.net/web/site/a264c9a9a776abb306b92dbfb6f2ee58ab40c57c202512.pdf.html
+2.Boletines
+2.1.Boletin de ENO,Carpeta:Boletines, File:Boletin_ENO2025.PDF
+2.2.Boletin de Diabetes Mellitus,Carpeta:Boletines, File:Boletin_DM2025.PDF
+2.3.Boletin de Perfiles de Demanda,Link:https://1drv.ms/x/c/8043d81aaac0c344/IQRsgHt9ZwzXSKRhfu2pYl-6ASRl60y7TL1f5p8AxxsdKmg
+3.Fichas Epidemiológicas,Carpeta:Fichas
+4.Mapa Microbiológico,Carpeta:Boletines, File:Boletin_MapaMB2025.PDF
+5.Alertas Epidemiológicas,Carpeta:Alertas
+6.IAAS,Carpeta:Boletines, File:Boletin_IAAS2025.PDF
+7.Comité PCI - Acuerdos,Carpeta:Boletines, File:AcuerdosPCI2025.PDF
+8.Análisis CEX,Link:/analisis-cex.html

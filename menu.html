@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+
+<style>
+  body {
+    margin: 0;
+    padding: 10px;
+    font-family: Arial;
+    background: transparent;
+    color: white;
+  }
+
+  .opcion {
+    background: rgba(255,255,255,0.08);
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.25s;
+    border: 1px solid rgba(255,255,255,0.22);
+  }
+  .opcion:hover {
+    background: rgba(255,255,255,0.22);
+  }
+
+  .submenu {
+    margin-left: 18px;
+    display: none;
+  }
+
+  .submenu .opcion {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+
+  .flecha {
+    float: right;
+    transition: transform 0.3s;
+  }
+
+  .flecha.abierto {
+    transform: rotate(90deg);
+  }
+</style>
+</head>
+
+<body>
+
+<div id="menuContainer">Cargando menú...</div>
+
+<script>
+// ==========================
+// Cargar menú desde /api/menu
+// ==========================
+fetch("/api/menu")
+  .then(res => res.json())
+  .then(menu => {
+
+    const cont = document.getElementById("menuContainer");
+    cont.innerHTML = "";
+
+    // Agrupar submenús
+    const submenus = {};
+
+    menu.forEach(item => {
+      if (item.subnumero) {
+        // subnumero = "2.1" → padre = "2"
+        const padre = item.subnumero.split(".")[0];
+
+        if (!submenus[padre]) submenus[padre] = [];
+        submenus[padre].push(item);
+      }
+    });
+
+    // Crear elementos del menú
+    menu.forEach(item => {
+
+      // Solo opciones PRINCIPALES
+      if (!item.subnumero) {
+
+        const div = document.createElement("div");
+        div.className = "opcion";
+        div.innerHTML = `${item.numero}. ${item.titulo}`;
+
+        // Si tiene submenús (como 2)
+        if (submenus[item.numero]) {
+
+          const flecha = document.createElement("span");
+          flecha.className = "flecha";
+          flecha.innerHTML = "▶";
+          div.appendChild(flecha);
+
+          // Crear contenedor
+          const sub = document.createElement("div");
+          sub.className = "submenu";
+
+          // Crear elementos hijos
+          submenus[item.numero].forEach(hijo => {
+            const subDiv = document.createElement("div");
+            subDiv.className = "opcion";
+            subDiv.innerHTML = `${hijo.subnumero}. ${hijo.titulo}`;
+            subDiv.onclick = () => {
+              window.parent.cargarContenidoDesdeMenu(hijo);
+            };
+            sub.appendChild(subDiv);
+          });
+
+          // Toggle de despliegue
+          div.onclick = () => {
+            const visible = sub.style.display === "block";
+            sub.style.display = visible ? "none" : "block";
+            flecha.classList.toggle("abierto");
+          };
+
+          cont.appendChild(div);
+          cont.appendChild(sub);
+
+        } else {
+          // Sin submenú → acción directa
+          div.onclick = () => {
+            window.parent.cargarContenidoDesdeMenu(item);
+          };
+          cont.appendChild(div);
+        }
+      }
+    });
+
+  });
+</script>
+
+</body>
+</html>

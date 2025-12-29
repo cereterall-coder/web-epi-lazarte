@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard CEX</title>
+<link rel="stylesheet" href="analisis-cex.css">
+<link rel="stylesheet" href="analisis-cex-modal.css">
+
+</head>
+<body>
+
+<header class="topbar">
+  <div class="title">📊 Dashboard CEX – Hospital Víctor Lazarte</div>
+  <select id="periodo"></select>
+</header>
+
+<main class="container">
+
+<section class="kpis">
+  <div class="kpi"><span>Total Atenciones</span><strong id="kpiTotal">0</strong></div>
+  <div class="kpi"><span>Servicios</span><strong id="kpiServicios">0</strong></div>
+  <div class="kpi"><span>Médicos</span><strong id="kpiMedicos">0</strong></div>
+</section>
+
+<section class="grid">
+
+  <div class="card">
+    <h3>Top 15 Diagnósticos</h3>
+    <select id="filtroServicioDx" style="margin-bottom:6px;font-size:11px"></select>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Diagnóstico</th>
+            <th>Total</th>
+            <th>%</th>
+          </tr>
+        </thead>
+        <tbody id="tablaDx"></tbody>
+        <tfoot id="tablaDxFoot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Atenciones por Servicio (Top 10)</h3>
+    <canvas id="chartServicios"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>Distribución por Grupos de Edad</h3>
+    <select id="filtroServicioEdad" style="margin-bottom:6px;font-size:11px"></select>
+    <canvas id="chartEdad"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>Médicos por Servicio</h3>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Servicio</th>
+            <th>Médicos</th>
+          </tr>
+        </thead>
+        <tbody id="tablaMedicosServicio"></tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="analisis-cex.js"></script>
+<script src="analisis-cex-modal.js"></script>
+
+</body>
+</html>

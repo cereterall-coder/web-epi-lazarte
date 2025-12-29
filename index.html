@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Epi_Lazarte</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<button id="btnMenu" title="Menú">&#9776;</button>
+<button id="btnFull" title="Pantalla completa">&#x26F6;</button>
+
+<div id="btnEquipo" onclick="mostrarEquipo()">👤</div>
+
+<div id="equipoBox">
+    <div id="btnEscribenos" onclick="abrirFormulario()">✉️</div>
+    <h3 style="margin:10px; text-align:center;">Equipo de Epidemiología</h3>
+    <img id="fotoEquipo" src="Logos/equipo.jpg"
+         style="width:100%; border-radius:12px; display:block;">
+    <div id="equipoTexto" style="padding:15px;"></div>
+</div>
+
+<img id="owl" src="Logos/buho1.png">
+
+<div id="teleprompter">
+  <span id="teleText">
+    Bienvenidos al Repositorio Virtual de la Oficina de Epidemiología
+    del Hospital Victor Lazarte Echegaray - R.A La Libertad
+  </span>
+</div>
+
+<div id="watermark">
+  Cynthia Ibet Avila Garcia<br>
+  Médico - Coordinadora de Epidemiología H. V. Lazarte<br>
+  Amaro Alexis Vilela Vargas<br>
+  Ingeniero de Sistemas
+</div>
+
+<iframe id="menuFrame" src="menu.html"></iframe>
+<div id="contentBox"></div>
+
+<!-- VISOR FULLSCREEN -->
+<div id="visorFlipFull" style="display:none;">
+    <div id="cerrarFlip" onclick="cerrarFlip()">✖</div>
+    <iframe id="flipFrame"></iframe>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

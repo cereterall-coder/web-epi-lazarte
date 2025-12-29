@@ -1,0 +1,66 @@
+
+/* =======================================
+   CEX MODAL – FIX TAMAÑO GRAFICO
+======================================= */
+.cex-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.cex-modal-overlay.show {
+  display: flex;
+}
+
+.cex-modal-box {
+  background: #ffffff;
+  width: 92%;
+  height: 92%;
+  border-radius: 14px;
+  padding: 16px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.cex-modal-close {
+  align-self: flex-end;
+  border: none;
+  background: #d62828;
+  color: white;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.cex-modal-content {
+  flex: 1;
+  position: relative;
+}
+
+.cex-modal-content canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.cex-max-btn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.cex-max-btn:hover {
+  opacity: 1;
+}
