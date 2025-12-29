@@ -19,32 +19,35 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 
-const mongoose = require("mongoose");
-require("dotenv").config();
+const admin = require("firebase-admin");
 
 // ============================================================
-//  CONFIGURACIÓN MONGODB
+//  CONFIGURACIÓN FIREBASE (BASE DE DATOS)
 // ============================================================
-// Esquema de la base de datos
-const PeticionSchema = new mongoose.Schema({
-    dni: String,
-    nombre: String,
-    telefono: String,
-    asunto: String,
-    fecha: { type: Date, default: Date.now }
-});
+// Intentar conectar usando variable de entorno (Nube) o archivo local (PC)
+let serviceAccount;
 
-const Peticion = mongoose.model("Peticion", PeticionSchema);
+try {
+    if (process.env.FIREBASE_CREDENTIALS) {
+        // En la nube (Render/Vercel) pondremos el JSON en esta variable
+        serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
+    } else {
+        // En tu PC, busca el archivo descargado
+        serviceAccount = require("./serviceAccountKey.json");
+    }
 
-// Conexión a la base de datos
-const connectionString = process.env.MONGO_URI;
-if (connectionString) {
-    mongoose.connect(connectionString)
-        .then(() => console.log("✔ Conectado a MongoDB"))
-        .catch(err => console.error("❌ Error conectando a MongoDB:", err));
-} else {
-    console.log("⚠ No se detectó MONGO_URI. Las peticiones no se guardarán en BD.");
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+    });
+
+    console.log("✔ Conectado a Firebase correctamente");
+
+} catch (error) {
+    console.log("⚠ No se pudo conectar a Firebase. Asegúrate de tener el archivo 'serviceAccountKey.json' o la variable de entorno configurada.");
+    console.error(error.message);
 }
+
+const db = admin.apps.length ? admin.firestore() : null;
 
 
 // ============================================================
@@ -155,7 +158,7 @@ app.get("/api/equipo", (req, res) => {
 
 
 // ============================================================
-//  FORMULARIO → GUARDAR EN MONGODB
+//  FORMULARIO → GUARDAR EN FIREBASE
 // ============================================================
 app.post("/api/peticion", async (req, res) => {
     const { dni, nombre, telefono, asunto } = req.body;
@@ -164,15 +167,20 @@ app.post("/api/peticion", async (req, res) => {
         return res.json({ ok: false, msg: "Datos incompletos" });
 
     try {
-        if (mongoose.connection.readyState === 1) {
-            // Guardar en MongoDB
-            const nuevaPeticion = new Peticion({ dni, nombre, telefono, asunto });
-            await nuevaPeticion.save();
-            console.log("✔ Petición guardada en MongoDB");
+        if (db) {
+            // Guardar en Firestore -> colección "peticiones"
+            await db.collection("peticiones").add({
+                dni,
+                nombre,
+                telefono,
+                asunto,
+                fecha: admin.firestore.FieldValue.serverTimestamp()
+            });
+            console.log("✔ Petición guardada en Firebase");
             return res.json({ ok: true });
         } else {
-            console.error("❌ MongoDB no está conectado.");
-            return res.json({ ok: false, msg: "Base de datos no disponible" });
+            console.error("❌ Firebase no está conectado.");
+            return res.json({ ok: false, msg: "Base de datos no disponible. Verifica credenciales." });
         }
     } catch (err) {
         console.error("❌ ERROR:", err);
