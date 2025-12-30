@@ -184,6 +184,7 @@ function serveStaticCaseInsensitive(folderName) {
 app.use("/fichas", serveStaticCaseInsensitive("Fichas"));
 app.use("/alertas", serveStaticCaseInsensitive("Alertas"));
 app.use("/Boletines", serveStaticCaseInsensitive("Boletines"));
+app.use("/Logos", serveStaticCaseInsensitive("Logos"));
 
 
 // ============================================================
