@@ -121,19 +121,36 @@ app.get("/api/menu", (req, res) => {
 
 
 // ============================================================
-//  FICHAS EPIDEMIOLOGICAS
+//  FICHAS EPIDEMIOLOGICAS Y ALERTAS (Mejorado)
 // ============================================================
-function listarPDFs(res, carpeta) {
-    fs.readdir(carpeta, (err, archivos) => {
-        if (err) return res.json([]);
+function encontrarCarpetaReal(nombreBuscado) {
+    const root = __dirname;
+    const archivos = fs.readdirSync(root);
+    // Busca una carpeta que coincida ignorando mayúsculas
+    const nombreReal = archivos.find(a => a.toLowerCase() === nombreBuscado.toLowerCase());
+    return nombreReal ? path.join(root, nombreReal) : null;
+}
+
+function listarPDFs(res, nombreCarpeta) {
+    const rutaReal = encontrarCarpetaReal(nombreCarpeta);
+
+    if (!rutaReal) {
+        console.error(`❌ Carpeta no encontrada: ${nombreCarpeta}`);
+        return res.json([]);
+    }
+
+    fs.readdir(rutaReal, (err, archivos) => {
+        if (err) {
+            console.error(`❌ Error leyendo carpeta ${rutaReal}:`, err);
+            return res.json([]);
+        }
         const pdfs = archivos.filter(a => a.toLowerCase().endsWith(".pdf"));
         res.json(pdfs);
     });
 }
 
-app.get("/api/fichas", (req, res) =>
-    listarPDFs(res, path.join(__dirname, "Fichas"))
-);
+app.get("/api/fichas", (req, res) => listarPDFs(res, "Fichas"));
+app.get("/api/alertas", (req, res) => listarPDFs(res, "Alertas"));
 
 // ============================================================
 //  MIDDLEWARE PARA ARCHIVOS INSENSIBLES A MAYÚSCULAS
