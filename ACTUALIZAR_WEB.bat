@@ -3,15 +3,19 @@ echo ===================================================
 echo   ACTUALIZADOR AUTOMATICO DE WEB EPI LAZARTE
 echo ===================================================
 echo.
-echo 1. Verificando cambios en Fichas y Alertas...
+echo 1. Descargando ultimas mejoras de la nube...
+git pull --rebase
+
+echo.
+echo 2. Agregando tus archivos nuevos...
 git add .
 
 echo.
-echo 2. Guardando cambios...
-git commit -m "Actualizacion automatica de archivos - %date% %time%"
+echo 3. Guardando cambios locales...
+git commit -m "Actualizacion de contenido - %date% %time%"
 
 echo.
-echo 3. Subiendo a la Nube (GitHub + Render)...
+echo 4. Subiendo todo a la Nube...
 git push
 
 echo.
