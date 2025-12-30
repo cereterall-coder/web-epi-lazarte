@@ -135,23 +135,38 @@ app.get("/api/fichas", (req, res) =>
     listarPDFs(res, path.join(__dirname, "Fichas"))
 );
 
-app.use("/fichas", express.static(path.join(__dirname, "Fichas")));
-
-
 // ============================================================
-//  ALERTAS
+//  MIDDLEWARE PARA ARCHIVOS INSENSIBLES A MAYÚSCULAS
 // ============================================================
-app.get("/api/alertas", (req, res) =>
-    listarPDFs(res, path.join(__dirname, "Alertas"))
-);
+function serveStaticCaseInsensitive(folderName) {
+    return (req, res, next) => {
+        const filePath = path.join(__dirname, folderName, req.path);
 
-app.use("/alertas", express.static(path.join(__dirname, "Alertas")));
+        // 1. Intenta servirlo tal cual
+        if (fs.existsSync(filePath)) {
+            return res.sendFile(filePath);
+        }
 
+        // 2. Si no existe, busca ignorando mayúsculas/minúsculas
+        const dir = path.dirname(filePath);
+        const baseName = path.basename(filePath).toLowerCase();
 
-// ============================================================
-//  BOLETINES
-// ============================================================
-app.use("/Boletines", express.static(path.join(__dirname, "Boletines")));
+        if (fs.existsSync(dir)) {
+            const files = fs.readdirSync(dir);
+            const found = files.find(f => f.toLowerCase() === baseName);
+            if (found) {
+                return res.sendFile(path.join(dir, found));
+            }
+        }
+
+        // 3. Si no encuentra nada, pasa al siguiente (404)
+        next();
+    };
+}
+
+app.use("/fichas", serveStaticCaseInsensitive("Fichas"));
+app.use("/alertas", serveStaticCaseInsensitive("Alertas"));
+app.use("/Boletines", serveStaticCaseInsensitive("Boletines"));
 
 
 // ============================================================
