@@ -24,27 +24,43 @@ const admin = require("firebase-admin");
 // ============================================================
 //  CONFIGURACIÓN FIREBASE (BASE DE DATOS)
 // ============================================================
-// Intentar conectar usando variable de entorno (Nube) o archivo local (PC)
 let serviceAccount;
+
+console.log("🔌 Iniciando configuración de Firebase...");
 
 try {
     if (process.env.FIREBASE_CREDENTIALS) {
-        // En la nube (Render/Vercel) pondremos el JSON en esta variable
-        serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
+        console.log("☁ Detectada variable de entorno FIREBASE_CREDENTIALS. (Longitud: " + process.env.FIREBASE_CREDENTIALS.length + " caracteres)");
+
+        try {
+            serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
+            console.log("✅ JSON de credenciales parseado correctamente. Project ID:", serviceAccount.project_id);
+        } catch (jsonError) {
+            console.error("❌ ERROR: El contenido de FIREBASE_CREDENTIALS no es un JSON válido.");
+            console.error("Detalle:", jsonError.message);
+            throw new Error("Credenciales inválidas");
+        }
+
     } else {
-        // En tu PC, busca el archivo descargado
-        serviceAccount = require("./serviceAccountKey.json");
+        console.log("🏠 No hay variable de entorno. Buscando archivo local 'serviceAccountKey.json'...");
+        if (fs.existsSync(path.join(__dirname, "serviceAccountKey.json"))) {
+            serviceAccount = require("./serviceAccountKey.json");
+        } else {
+            console.warn("⚠ ADVERTENCIA: No se encontró archivo local ni variable de entorno.");
+        }
     }
 
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
-    });
-
-    console.log("✔ Conectado a Firebase correctamente");
+    if (serviceAccount) {
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount)
+        });
+        console.log("✔ Firebase Conectado Exitosamente!");
+    } else {
+        console.error("❌ No se pudieron cargar las credenciales. La base de datos no funcionará.");
+    }
 
 } catch (error) {
-    console.log("⚠ No se pudo conectar a Firebase. Asegúrate de tener el archivo 'serviceAccountKey.json' o la variable de entorno configurada.");
-    console.error(error.message);
+    console.error("❌ ERROR CRÍTICO AL CONECTAR FIREBASE:", error.message);
 }
 
 const db = admin.apps.length ? admin.firestore() : null;
