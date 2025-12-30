@@ -145,15 +145,15 @@ function enviarPeticion() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     })
-    .then(r => r.json())
-    .then(resp => {
-        if (resp.ok) {
-            alert("✔ Mensaje enviado correctamente");
-            cerrarTarjeta();
-        } else {
-            alert("❌ Error: " + resp.msg);
-        }
-    });
+        .then(r => r.json())
+        .then(resp => {
+            if (resp.ok) {
+                alert("✔ Mensaje enviado correctamente");
+                cerrarTarjeta();
+            } else {
+                alert("❌ Error: " + resp.msg);
+            }
+        });
 }
 
 /* ============================================================
@@ -190,6 +190,12 @@ function cargarContenidoDesdeMenu(item) {
    PDF EN PANEL
 ============================================================ */
 function abrirPDFenPanel(url) {
+    // Detectar móvil
+    if (window.innerWidth < 768) {
+        window.open(url, "_blank");
+        return;
+    }
+
     const box = document.getElementById("contentBox");
     box.style.display = "block";
 
@@ -210,6 +216,12 @@ function abrirPDFenPanel(url) {
    FULLSCREEN
 ============================================================ */
 function abrirFullscreen(url) {
+
+    // Detectar móvil
+    if (window.innerWidth < 768) {
+        window.open(url, "_blank");
+        return;
+    }
 
     ocultarTarjetas();
 
