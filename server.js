@@ -63,9 +63,58 @@ try {
     console.error("❌ ERROR CRÍTICO AL CONECTAR FIREBASE:", error.message);
 }
 
+
 const db = admin.apps.length ? admin.firestore() : null;
 
 
+// ============================================================
+//  CONFIGURACIÓN UPLOAD (MULTER)
+// ============================================================
+const multer = require("multer");
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        // Obtenemos la carpeta destino desde el body o header
+        // Por seguridad, validamos que sea Fichas, Alertas o Boletines
+        let folderName = req.body.carpeta || "Fichas";
+        const allowed = ["Fichas", "Alertas", "Boletines"];
+
+        if (!allowed.includes(folderName)) {
+            folderName = "Fichas";
+        }
+
+        const folderPath = encontrarCarpetaReal(folderName) || path.join(__dirname, folderName);
+        cb(null, folderPath);
+    },
+    filename: function (req, file, cb) {
+        // Mantenemos nombre original pero sanitizado
+        cb(null, file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, "_"));
+    }
+});
+
+const upload = multer({ storage: storage });
+
+app.post("/api/upload", upload.single("archivo"), (req, res) => {
+    const { password } = req.body;
+
+    // VALIDACIÓN SIMPLE DE CLAVE
+    // En producción esto debería ser una variable de entorno
+    if (password !== "admin123") {
+        return res.status(401).json({ ok: false, msg: "Contraseña incorrecta" });
+    }
+
+    if (!req.file) {
+        return res.status(400).json({ ok: false, msg: "No se subió ningún archivo" });
+    }
+
+    res.json({ ok: true, msg: "Archivo subido exitosamente" });
+});
+
+
+
+// ============================================================
+//  API: LEER MENU
+// ============================================================
 // ============================================================
 //  API: LEER MENU
 // ============================================================
@@ -116,6 +165,31 @@ app.get("/api/menu", (req, res) => {
         });
 
         res.json(menu);
+    });
+});
+
+// ============================================================
+//  API: GUARDAR MENU
+// ============================================================
+app.post("/api/menu", (req, res) => {
+    const { password, content } = req.body;
+
+    if (password !== "admin123") {
+        return res.status(401).json({ ok: false, msg: "Contraseña incorrecta" });
+    }
+
+    if (!content) {
+        return res.status(400).json({ ok: false, msg: "Contenido vacío" });
+    }
+
+    const rutaMenu = path.join(__dirname, "Menu.txt");
+
+    fs.writeFile(rutaMenu, content, "utf8", (err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ ok: false, msg: "Error al guardar archivo" });
+        }
+        res.json({ ok: true, msg: "Menú actualizado correctamente" });
     });
 });
 

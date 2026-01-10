@@ -337,7 +337,215 @@ function cargarContenido(vista) {
 /* ============================================================
    CIERRE GENERAL
 ============================================================ */
+
+/* ============================================================
+   CIERRE GENERAL
+ ============================================================ */
 function cerrarTarjeta() {
     ocultarTarjetas();
-    document.getElementById("menuFrame").classList.add("open");
+
+    // Si la pantalla es ancha (>768), abrimos el menú al cerrar tarjetas
+    // Para que no quede vacío
+    if (window.innerWidth >= 768) {
+        const menu = document.getElementById("menuFrame");
+        if (menu) menu.classList.add("open");
+    }
+}
+
+
+/* ============================================================
+   SUBIDA SEGURA DE ARCHIVOS
+ ============================================================ */
+function abrirModalUpload() {
+    ocultarTarjetas();
+
+    const box = document.getElementById("contentBox");
+    box.style.display = "block";
+
+    box.innerHTML = `
+        <div class="tarjeta tarjeta-form-elegante" style="max-width: 400px;">
+            <button class="cerrar-form" onclick="cerrarTarjeta()">✕</button>
+
+            <div class="form-header">
+                <div class="form-icon">🔐</div>
+                <h2>Zona Segura</h2>
+                <p>Ingresa la clave maestra para subir archivos.</p>
+            </div>
+
+            <div id="pasoAuth">
+                 <div class="field">
+                    <label>Contraseña de Acceso</label>
+                    <input id="uploadPass" type="password" placeholder="••••••••">
+                </div>
+                <div class="form-actions" style="justify-content:center; margin-top:20px;">
+                    <button class="btn-enviar-elegante" onclick="verificarClaveUpload()">
+                        Verificar Acceso
+                    </button>
+                </div>
+            </div>
+
+            <div id="pasoUpload" style="display:none; animation: fadeUp 0.5s ease;">
+                <div class="field">
+                    <label>Seleccionar Destino</label>
+                    <select id="uploadDestino" style="width:100%; padding:10px; border-radius:10px; border:1px solid #ccd3dc; margin-bottom:12px;">
+                        <option value="Alertas">Alertas Epidemiológicas</option>
+                        <option value="Fichas">Fichas Epidemiológicas</option>
+                        <option value="Boletines">Boletines</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Archivo PDF</label>
+                    <input id="uploadFile" type="file" accept=".pdf" style="background:#f4f6f8;">
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn-enviar-elegante" onclick="subirArchivoReal()">
+                        subir ☁
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    `;
+}
+
+function verificarClaveUpload() {
+    const pass = document.getElementById("uploadPass").value;
+    // Validación preliminar en cliente para UI rápida
+    // La validación real ocurre en el servidor
+    if (pass === "admin123") {
+        document.getElementById("pasoAuth").style.display = "none";
+        document.getElementById("pasoUpload").style.display = "block";
+    } else {
+        alert("⛔ Clave incorrecta");
+    }
+}
+
+function subirArchivoReal() {
+    const fileInput = document.getElementById("uploadFile");
+    const carpeta = document.getElementById("uploadDestino").value;
+    const pass = document.getElementById("uploadPass").value;
+
+    if (!fileInput.files.length) {
+        alert("Selecciona un archivo");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("archivo", fileInput.files[0]);
+    formData.append("carpeta", carpeta);
+    formData.append("password", pass);
+
+    fetch("/api/upload", {
+        method: "POST",
+        body: formData
+    })
+        .then(r => r.json())
+        .then(res => {
+            if (res.ok) {
+                alert("✅ " + res.msg);
+                cerrarTarjeta();
+            } else {
+                alert("❌ Error: " + res.msg);
+            }
+        })
+        .catch(err => {
+            alert("Error de conexión");
+            console.error(err);
+        });
+}
+
+/* ============================================================ 
+   EDITAR MENU (SISTEMA)
+ ============================================================ */
+function abrirModalMenu() {
+    ocultarTarjetas();
+
+    const box = document.getElementById("contentBox");
+    box.style.display = "block";
+
+    box.innerHTML = `
+        <div class="tarjeta tarjeta-form-elegante" style="max-width: 600px;">
+            <button class="cerrar-form" onclick="cerrarTarjeta()">✕</button>
+
+            <div class="form-header">
+                <div class="form-icon">📝</div>
+                <h2>Editor de Menú</h2>
+                <p>Modifica el archivo Menu.txt directamente.</p>
+            </div>
+
+            <div id="pasoAuthMenu">
+                 <div class="field">
+                    <label>Contraseña de Administrador</label>
+                    <input id="menuPass" type="password" placeholder="••••••••">
+                </div>
+                <div class="form-actions" style="justify-content:center; margin-top:20px;">
+                    <button class="btn-enviar-elegante" onclick="verificarClaveMenu()">
+                        Acceder al Editor
+                    </button>
+                </div>
+            </div>
+
+            <div id="pasoEditor" style="display:none; animation: fadeUp 0.5s ease;">
+                <div class="field field-full">
+                    <label>Contenido del Menú (Formato Texto)</label>
+                    <textarea id="menuContent" style="height:300px; font-family:monospace; font-size:13px; line-height:1.4; white-space:pre;"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn-enviar-elegante" onclick="guardarMenu()">
+                        Guardar Cambios 💾
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    `;
+}
+
+function verificarClaveMenu() {
+    const pass = document.getElementById("menuPass").value;
+
+    // Verificación preliminar (la real es en servidor)
+    if (pass === "admin123") {
+        // Cargar contenido actual
+        fetch("/Menu.txt")
+            .then(res => res.text())
+            .then(text => {
+                document.getElementById("pasoAuthMenu").style.display = "none";
+                document.getElementById("pasoEditor").style.display = "block";
+                document.getElementById("menuContent").value = text;
+            })
+            .catch(err => alert("Error cargando menú: " + err));
+    } else {
+        alert("⛔ Clave incorrecta");
+    }
+}
+
+function guardarMenu() {
+    const content = document.getElementById("menuContent").value;
+    const pass = document.getElementById("menuPass").value;
+
+    fetch("/api/menu", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pass, content: content })
+    })
+        .then(r => r.json())
+        .then(res => {
+            if (res.ok) {
+                alert("✅ " + res.msg);
+                cerrarTarjeta();
+                // Recargar el iframe del menú para ver cambios
+                const menuFrame = document.getElementById("menuFrame");
+                if (menuFrame) menuFrame.contentWindow.location.reload();
+            } else {
+                alert("❌ Error: " + res.msg);
+            }
+        })
+        .catch(err => {
+            alert("Error de conexión");
+            console.error(err);
+        });
 }

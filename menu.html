@@ -1,135 +1,175 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
+  <meta charset="UTF-8">
 
-<style>
-  body {
-    margin: 0;
-    padding: 10px;
-    font-family: Arial;
-    background: transparent;
-    color: white;
-  }
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap');
 
-  .opcion {
-    background: rgba(255,255,255,0.08);
-    padding: 8px 10px;
-    margin-bottom: 6px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 13px;
-    transition: 0.25s;
-    border: 1px solid rgba(255,255,255,0.22);
-  }
-  .opcion:hover {
-    background: rgba(255,255,255,0.22);
-  }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Outfit', sans-serif;
+      background: transparent;
+      color: #e2e8f0;
+    }
 
-  .submenu {
-    margin-left: 18px;
-    display: none;
-  }
+    /* Scrollbar personalizado */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
 
-  .submenu .opcion {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.18);
-  }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
 
-  .flecha {
-    float: right;
-    transition: transform 0.3s;
-  }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
-  .flecha.abierto {
-    transform: rotate(90deg);
-  }
-</style>
+    .opcion {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 400;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(5px);
+    }
+
+    .opcion:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(4px);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .submenu {
+      margin-left: 12px;
+      padding-left: 12px;
+      border-left: 2px solid rgba(255, 255, 255, 0.1);
+      display: none;
+      margin-bottom: 12px;
+    }
+
+    .submenu .opcion {
+      background: transparent;
+      border: none;
+      padding: 8px 12px;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .submenu .opcion:hover {
+      background: rgba(255, 255, 255, 0.08);
+      opacity: 1;
+    }
+
+    .flecha {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+      transition: transform 0.3s;
+    }
+
+    .flecha.abierto {
+      transform: rotate(90deg);
+      color: white;
+    }
+  </style>
 </head>
 
 <body>
 
-<div id="menuContainer">Cargando menú...</div>
+  <div id="menuContainer">Cargando menú...</div>
 
-<script>
-// ==========================
-// Cargar menú desde /api/menu
-// ==========================
-fetch("/api/menu")
-  .then(res => res.json())
-  .then(menu => {
+  <script>
+    // ==========================
+    // Cargar menú desde /api/menu
+    // ==========================
+    fetch("/api/menu")
+      .then(res => res.json())
+      .then(menu => {
 
-    const cont = document.getElementById("menuContainer");
-    cont.innerHTML = "";
+        const cont = document.getElementById("menuContainer");
+        cont.innerHTML = "";
 
-    // Agrupar submenús
-    const submenus = {};
+        // Agrupar submenús
+        const submenus = {};
 
-    menu.forEach(item => {
-      if (item.subnumero) {
-        // subnumero = "2.1" → padre = "2"
-        const padre = item.subnumero.split(".")[0];
+        menu.forEach(item => {
+          if (item.subnumero) {
+            // subnumero = "2.1" → padre = "2"
+            const padre = item.subnumero.split(".")[0];
 
-        if (!submenus[padre]) submenus[padre] = [];
-        submenus[padre].push(item);
-      }
-    });
+            if (!submenus[padre]) submenus[padre] = [];
+            submenus[padre].push(item);
+          }
+        });
 
-    // Crear elementos del menú
-    menu.forEach(item => {
+        // Crear elementos del menú
+        menu.forEach(item => {
 
-      // Solo opciones PRINCIPALES
-      if (!item.subnumero) {
+          // Solo opciones PRINCIPALES
+          if (!item.subnumero) {
 
-        const div = document.createElement("div");
-        div.className = "opcion";
-        div.innerHTML = `${item.numero}. ${item.titulo}`;
+            const div = document.createElement("div");
+            div.className = "opcion";
+            div.innerHTML = `${item.numero}. ${item.titulo}`;
 
-        // Si tiene submenús (como 2)
-        if (submenus[item.numero]) {
+            // Si tiene submenús (como 2)
+            if (submenus[item.numero]) {
 
-          const flecha = document.createElement("span");
-          flecha.className = "flecha";
-          flecha.innerHTML = "▶";
-          div.appendChild(flecha);
+              const flecha = document.createElement("span");
+              flecha.className = "flecha";
+              flecha.innerHTML = "▶";
+              div.appendChild(flecha);
 
-          // Crear contenedor
-          const sub = document.createElement("div");
-          sub.className = "submenu";
+              // Crear contenedor
+              const sub = document.createElement("div");
+              sub.className = "submenu";
 
-          // Crear elementos hijos
-          submenus[item.numero].forEach(hijo => {
-            const subDiv = document.createElement("div");
-            subDiv.className = "opcion";
-            subDiv.innerHTML = `${hijo.subnumero}. ${hijo.titulo}`;
-            subDiv.onclick = () => {
-              window.parent.cargarContenidoDesdeMenu(hijo);
-            };
-            sub.appendChild(subDiv);
-          });
+              // Crear elementos hijos
+              submenus[item.numero].forEach(hijo => {
+                const subDiv = document.createElement("div");
+                subDiv.className = "opcion";
+                subDiv.innerHTML = `${hijo.subnumero}. ${hijo.titulo}`;
+                subDiv.onclick = () => {
+                  window.parent.cargarContenidoDesdeMenu(hijo);
+                };
+                sub.appendChild(subDiv);
+              });
 
-          // Toggle de despliegue
-          div.onclick = () => {
-            const visible = sub.style.display === "block";
-            sub.style.display = visible ? "none" : "block";
-            flecha.classList.toggle("abierto");
-          };
+              // Toggle de despliegue
+              div.onclick = () => {
+                const visible = sub.style.display === "block";
+                sub.style.display = visible ? "none" : "block";
+                flecha.classList.toggle("abierto");
+              };
 
-          cont.appendChild(div);
-          cont.appendChild(sub);
+              cont.appendChild(div);
+              cont.appendChild(sub);
 
-        } else {
-          // Sin submenú → acción directa
-          div.onclick = () => {
-            window.parent.cargarContenidoDesdeMenu(item);
-          };
-          cont.appendChild(div);
-        }
-      }
-    });
+            } else {
+              // Sin submenú → acción directa
+              div.onclick = () => {
+                window.parent.cargarContenidoDesdeMenu(item);
+              };
+              cont.appendChild(div);
+            }
+          }
+        });
 
-  });
-</script>
+      });
+  </script>
 
 </body>
+
 </html>
