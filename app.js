@@ -477,69 +477,11 @@ function verificarClaveAdmin() {
             document.body.appendChild(hidden);
         }
 
-        // 6. Eliminar Archivos
-        function mostrarEliminarArchivos() {
-            document.getElementById("pasoDashboard").style.display = "none";
-            document.getElementById("pasoDelete").style.display = "block";
-        }
-
-        function cargarArchivosDelete() {
-            const folder = document.getElementById("deleteFolder").value;
-            const select = document.getElementById("deleteFile");
-
-            select.innerHTML = "<option>Cargando...</option>";
-
-            if (!folder) {
-                select.innerHTML = "<option>(Selecciona carpeta)</option>";
-                return;
-            }
-
-            fetch("/api/list?folder=" + folder)
-                .then(r => r.json())
-                .then(files => {
-                    if (files.length === 0) {
-                        select.innerHTML = "<option value=''>vacio</option>";
-                    } else {
-                        select.innerHTML = files.map(f => `<option value="${f}">${f}</option>`).join("");
-                    }
-                });
-        }
-
-        function eliminarArchivoReal() {
-            const folder = document.getElementById("deleteFolder").value;
-            const file = document.getElementById("deleteFile").value;
-            const pass = document.getElementById("hiddenAuthPass").value;
-
-            if (!folder || !file) {
-                alert("Selecciona carpeta y archivo");
-                return;
-            }
-
-            if (!confirm(`¿Estás SEGURO de eliminar ${file}?\nEsta acción no se puede deshacer.`)) {
-                return;
-            }
-
-            fetch("/api/delete", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ password: pass, folder: folder, file: file })
-            })
-                .then(r => r.json())
-                .then(res => {
-                    if (res.ok) {
-                        alert("🗑️ Archivo eliminado");
-                        cargarArchivosDelete(); // Refrescar lista
-                    } else {
-                        alert("❌ Error: " + res.msg);
-                    }
-                })
-                .catch(err => alert("Error de conexión"));
-        }
-
         // Mostrar Dashboard
         document.getElementById("pasoAuth").style.display = "none";
         document.getElementById("pasoUpload").style.display = "none";
         document.getElementById("pasoEditorMenu").style.display = "none";
+        document.getElementById("pasoDelete").style.display = "none";
         document.getElementById("pasoDashboard").style.display = "block";
     } else {
         alert("⛔ Clave incorrecta");
@@ -623,4 +565,64 @@ function guardarMenuReal() {
 }
 
 
+
+
+// 6. Eliminar Archivos
+function mostrarEliminarArchivos() {
+    document.getElementById('pasoDashboard').style.display = 'none';
+    document.getElementById('pasoDelete').style.display = 'block';
+}
+
+function cargarArchivosDelete() {
+    const folder = document.getElementById('deleteFolder').value;
+    const select = document.getElementById('deleteFile');
+
+    select.innerHTML = '<option>Cargando...</option>';
+
+    if (!folder) {
+        select.innerHTML = '<option>(Selecciona carpeta)</option>';
+        return;
+    }
+
+    fetch('/api/list?folder=' + folder)
+        .then(r => r.json())
+        .then(files => {
+            if (files.length === 0) {
+                select.innerHTML = '<option value=''>vacio</option>';
+            } else {
+                select.innerHTML = files.map(f => \<option value='\'>\</option>\).join('');
+            }
+        });
+}
+
+function eliminarArchivoReal() {
+    const folder = document.getElementById('deleteFolder').value;
+    const file = document.getElementById('deleteFile').value;
+    const pass = document.getElementById('hiddenAuthPass').value;
+
+    if (!folder || !file) {
+        alert('Selecciona carpeta y archivo');
+        return;
+    }
+
+    if (!confirm(\�Est�s SEGURO de eliminar \?\nEsta acci�n no se puede deshacer.\)) {
+        return;
+    }
+
+    fetch('/api/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass, folder: folder, file: file })
+    })
+        .then(r => r.json())
+        .then(res => {
+            if (res.ok) {
+                alert('??? Archivo eliminado');
+                cargarArchivosDelete(); // Refrescar lista
+            } else {
+                alert('? Error: ' + res.msg);
+            }
+        })
+        .catch(err => alert('Error de conexi�n'));
+}
 
