@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    UTILIDADES GENERALES
 ============================================================ */
 function ocultarTarjetas() {
@@ -323,8 +323,8 @@ function cargarContenido(vista) {
                 card.innerHTML = `
                     <a href="javascript:abrirFullscreen('/${carpeta}/${name}')"
                        style="color:#2c3e50;
-                              text-decoration:none;
-                              font-weight:500">
+                               text-decoration:none;
+                               font-weight:500">
                         ${name}
                     </a>
                 `;
@@ -337,10 +337,6 @@ function cargarContenido(vista) {
 /* ============================================================
    CIERRE GENERAL
 ============================================================ */
-
-/* ============================================================
-   CIERRE GENERAL
- ============================================================ */
 function cerrarTarjeta() {
     ocultarTarjetas();
 
@@ -354,10 +350,7 @@ function cerrarTarjeta() {
 
 
 /* ============================================================
-   SUBIDA SEGURA DE ARCHIVOS
- ============================================================ */
-/* ============================================================
-   PANEL ADMINISTRADOR (Subida y Edición de Menú)
+   PANEL ADMINISTRADOR (Subida, Edición y Eliminación)
  ============================================================ */
 function abrirModalUpload() {
     ocultarTarjetas();
@@ -366,7 +359,7 @@ function abrirModalUpload() {
     box.style.display = "block";
 
     box.innerHTML = `
-        <div class="tarjeta tarjeta-form-elegante" style="max-width: 500px;">
+        <div class="tarjeta tarjeta-form-elegante" style="max-width: 600px;">
             <button class="cerrar-form" onclick="cerrarTarjeta()">✕</button>
 
             <div class="form-header">
@@ -392,13 +385,13 @@ function abrirModalUpload() {
             <div id="pasoDashboard" style="display:none; animation: fadeUp 0.5s ease; text-align:center;">
                 <p style="margin-bottom:20px; font-weight:600; color:#333;">¿Qué deseas hacer?</p>
                 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
                     <button onclick="mostrarSubidaArchivos()" style="
                         padding: 15px; border-radius:12px; border:1px solid #ccd3dc; 
                         background:#fff; cursor:pointer; transition:all 0.3s;">
                         <div style="font-size:24px; margin-bottom:5px;">☁️</div>
-                        <div style="font-weight:bold; color:#0b4f9c;">Subir Archivos</div>
-                        <div style="font-size:11px; color:#666;">Fichas y Alertas</div>
+                        <div style="font-weight:bold; color:#0b4f9c;">Subir</div>
+                        <div style="font-size:10px; color:#666;">Fichas/Alertas</div>
                     </button>
 
                     <button onclick="mostrarEditorMenu()" style="
@@ -406,7 +399,15 @@ function abrirModalUpload() {
                         background:#fff; cursor:pointer; transition:all 0.3s;">
                         <div style="font-size:24px; margin-bottom:5px;">📝</div>
                         <div style="font-weight:bold; color:#0b4f9c;">Editar Menú</div>
-                        <div style="font-size:11px; color:#666;">Modificar Menu.txt</div>
+                        <div style="font-size:10px; color:#666;">Linkear PDFs</div>
+                    </button>
+
+                    <button onclick="mostrarEliminarArchivos()" style="
+                        padding: 15px; border-radius:12px; border:1px solid #ccd3dc; 
+                        background:#fff; cursor:pointer; transition:all 0.3s;">
+                        <div style="font-size:24px; margin-bottom:5px;">🗑️</div>
+                        <div style="font-weight:bold; color:#d62828;">Eliminar</div>
+                        <div style="font-size:10px; color:#666;">Borrar PDFs</div>
                     </button>
                 </div>
             </div>
@@ -458,6 +459,37 @@ function abrirModalUpload() {
                 </div>
             </div>
 
+            <!-- PASO 3C: ELIMINAR ARCHIVOS -->
+            <div id="pasoDelete" style="display:none; animation: fadeUp 0.5s ease;">
+                 <h3 style="color:#d62828; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:15px;">🗑️ Eliminar Archivo</h3>
+
+                 <div class="field">
+                    <label>1. Seleccionar Carpeta</label>
+                    <select id="deleteFolder" onchange="cargarArchivosDelete()" style="width:100%; padding:10px; border-radius:10px; border:1px solid #ccd3dc; margin-bottom:12px;">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Alertas">Alertas Epidemiológicas</option>
+                        <option value="Fichas">Fichas Epidemiológicas</option>
+                        <option value="Boletines">Boletines</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>2. Seleccionar Archivo a Eliminar</label>
+                    <select id="deleteFile" style="width:100%; padding:10px; border-radius:10px; border:1px solid #ccd3dc; margin-bottom:12px; background:#fff0f0;">
+                        <option value="">(Primero selecciona carpeta)</option>
+                    </select>
+                </div>
+
+                <div class="form-actions" style="justify-content:space-between">
+                    <button onclick="verificarClaveAdmin()" style="border:none; background:none; color:#666; cursor:pointer;">
+                        ← Volver
+                    </button>
+                    <button class="btn-enviar-elegante" style="background:#d62828;" onclick="eliminarArchivoReal()">
+                        ELIMINAR DEFINITIVAMENTE
+                    </button>
+                </div>
+            </div>
+
         </div>
     `;
 }
@@ -468,7 +500,6 @@ function verificarClaveAdmin() {
     const pass = passInput ? passInput.value : document.getElementById("hiddenAuthPass").value;
 
     if (pass === "admin123") {
-        // Guardar pass en memoria oculta por si se necesita reenviar
         if (!document.getElementById("hiddenAuthPass")) {
             const hidden = document.createElement("input");
             hidden.type = "hidden";
@@ -477,7 +508,6 @@ function verificarClaveAdmin() {
             document.body.appendChild(hidden);
         }
 
-        // Mostrar Dashboard
         document.getElementById("pasoAuth").style.display = "none";
         document.getElementById("pasoUpload").style.display = "none";
         document.getElementById("pasoEditorMenu").style.display = "none";
@@ -488,13 +518,12 @@ function verificarClaveAdmin() {
     }
 }
 
-// 2. Mostrar Panel Subida
+// 2. Mostrar Paneles
 function mostrarSubidaArchivos() {
     document.getElementById("pasoDashboard").style.display = "none";
     document.getElementById("pasoUpload").style.display = "block";
 }
 
-// 3. Mostrar Panel Editor
 function mostrarEditorMenu() {
     fetch("/Menu.txt")
         .then(r => r.text())
@@ -506,7 +535,34 @@ function mostrarEditorMenu() {
         .catch(err => alert("Error leyendo menú: " + err));
 }
 
-// 4. Ejecutar Subida
+function mostrarEliminarArchivos() {
+    document.getElementById("pasoDashboard").style.display = "none";
+    document.getElementById("pasoDelete").style.display = "block";
+}
+
+function cargarArchivosDelete() {
+    const folder = document.getElementById("deleteFolder").value;
+    const select = document.getElementById("deleteFile");
+
+    select.innerHTML = "<option>Cargando...</option>";
+
+    if (!folder) {
+        select.innerHTML = "<option>(Selecciona carpeta)</option>";
+        return;
+    }
+
+    fetch("/api/list?folder=" + folder)
+        .then(r => r.json())
+        .then(files => {
+            if (files.length === 0) {
+                select.innerHTML = "<option value=''>vacio</option>";
+            } else {
+                select.innerHTML = files.map(f => `<option value="${f}">${f}</option>`).join("");
+            }
+        });
+}
+
+// 3. Acciones Reales
 function subirArchivoReal() {
     const fileInput = document.getElementById("uploadFile");
     const carpeta = document.getElementById("uploadDestino").value;
@@ -530,7 +586,6 @@ function subirArchivoReal() {
         .then(res => {
             if (res.ok) {
                 alert("✅ " + res.msg);
-                // No cerramos, volvemos al dashboard por si quiere subir otro
                 verificarClaveAdmin();
             } else {
                 alert("❌ Error: " + res.msg);
@@ -539,7 +594,6 @@ function subirArchivoReal() {
         .catch(err => alert("Error de conexión"));
 }
 
-// 5. Guardar Menú
 function guardarMenuReal() {
     const content = document.getElementById("menuContentEditor").value;
     const pass = document.getElementById("hiddenAuthPass").value;
@@ -553,7 +607,6 @@ function guardarMenuReal() {
         .then(res => {
             if (res.ok) {
                 alert("✅ " + res.msg);
-                // Recargar el iframe del menú para ver cambios
                 const menuFrame = document.getElementById("menuFrame");
                 if (menuFrame) menuFrame.contentWindow.location.reload();
                 verificarClaveAdmin();
@@ -564,65 +617,33 @@ function guardarMenuReal() {
         .catch(err => alert("Error de conexión"));
 }
 
-
-
-
-// 6. Eliminar Archivos
-function mostrarEliminarArchivos() {
-    document.getElementById('pasoDashboard').style.display = 'none';
-    document.getElementById('pasoDelete').style.display = 'block';
-}
-
-function cargarArchivosDelete() {
-    const folder = document.getElementById('deleteFolder').value;
-    const select = document.getElementById('deleteFile');
-
-    select.innerHTML = '<option>Cargando...</option>';
-
-    if (!folder) {
-        select.innerHTML = '<option>(Selecciona carpeta)</option>';
-        return;
-    }
-
-    fetch('/api/list?folder=' + folder)
-        .then(r => r.json())
-        .then(files => {
-            if (files.length === 0) {
-                select.innerHTML = '<option value=''>vacio</option>';
-            } else {
-                select.innerHTML = files.map(f => \<option value='\'>\</option>\).join('');
-            }
-        });
-}
-
 function eliminarArchivoReal() {
-    const folder = document.getElementById('deleteFolder').value;
-    const file = document.getElementById('deleteFile').value;
-    const pass = document.getElementById('hiddenAuthPass').value;
+    const folder = document.getElementById("deleteFolder").value;
+    const file = document.getElementById("deleteFile").value;
+    const pass = document.getElementById("hiddenAuthPass").value;
 
     if (!folder || !file) {
-        alert('Selecciona carpeta y archivo');
+        alert("Selecciona carpeta y archivo");
         return;
     }
 
-    if (!confirm(\�Est�s SEGURO de eliminar \?\nEsta acci�n no se puede deshacer.\)) {
+    if (!confirm(`¿Estás SEGURO de eliminar ${file}?\nEsta acción no se puede deshacer.`)) {
         return;
     }
 
-    fetch('/api/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+    fetch("/api/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: pass, folder: folder, file: file })
     })
         .then(r => r.json())
         .then(res => {
             if (res.ok) {
-                alert('??? Archivo eliminado');
+                alert("🗑️ Archivo eliminado");
                 cargarArchivosDelete(); // Refrescar lista
             } else {
-                alert('? Error: ' + res.msg);
+                alert("❌ Error: " + res.msg);
             }
         })
-        .catch(err => alert('Error de conexi�n'));
+        .catch(err => alert("Error de conexión"));
 }
-
