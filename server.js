@@ -261,6 +261,35 @@ app.post("/api/delete", (req, res) => {
 });
 
 // ============================================================
+//  API: TELEPROMPTER
+// ============================================================
+app.get("/api/teleprompter", (req, res) => {
+    const ruta = path.join(__dirname, "Teleprompter.txt");
+    if (fs.existsSync(ruta)) {
+        res.sendFile(ruta);
+    } else {
+        res.send("Bienvenidos al Repositorio Virtual...");
+    }
+});
+
+app.post("/api/teleprompter", (req, res) => {
+    const { password, content } = req.body;
+
+    if (!esPasswordValida(password)) {
+        return res.status(401).json({ ok: false, msg: "Contraseña incorrecta" });
+    }
+
+    const ruta = path.join(__dirname, "Teleprompter.txt");
+    fs.writeFile(ruta, content, "utf8", (err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ ok: false, msg: "Error guardando anuncio" });
+        }
+        res.json({ ok: true, msg: "Anuncio actualizado corrextamente" });
+    });
+});
+
+// ============================================================
 //  API: LISTAR ARCHIVOS (GENÉRICO)
 // ============================================================
 app.get("/api/list", (req, res) => {

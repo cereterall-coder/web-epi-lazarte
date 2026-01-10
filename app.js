@@ -65,6 +65,18 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ============================================================
+   CARGA INICIAL: TELEPROMPTER
+============================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+    fetch("/api/teleprompter")
+        .then(r => r.text())
+        .then(txt => {
+            const el = document.getElementById("teleText");
+            if (el && txt) el.innerText = txt;
+        });
+});
+
+/* ============================================================
    ESCRÍBENOS — FORMULARIO ELEGANTE
 ============================================================ */
 
@@ -350,7 +362,7 @@ function cerrarTarjeta() {
 
 
 /* ============================================================
-   PANEL ADMINISTRADOR (Subida, Edición y Eliminación)
+   PANEL ADMINISTRADOR (Subida, Edición, Eliminación, Teleprompter)
  ============================================================ */
 function abrirModalUpload() {
     ocultarTarjetas();
@@ -359,7 +371,7 @@ function abrirModalUpload() {
     box.style.display = "block";
 
     box.innerHTML = `
-        <div class="tarjeta tarjeta-form-elegante" style="max-width: 600px;">
+        <div class="tarjeta tarjeta-form-elegante" style="max-width: 650px;">
             <button class="cerrar-form" onclick="cerrarTarjeta()">✕</button>
 
             <div class="form-header">
@@ -385,10 +397,10 @@ function abrirModalUpload() {
             <div id="pasoDashboard" style="display:none; animation: fadeUp 0.5s ease; text-align:center;">
                 <p style="margin-bottom:20px; font-weight:600; color:#333;">¿Qué deseas hacer?</p>
                 
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                     <button onclick="mostrarSubidaArchivos()" style="
                         padding: 15px; border-radius:12px; border:1px solid #ccd3dc; 
-                        background:#fff; cursor:pointer; transition:all 0.3s;">
+                        background:#fff; cursor:pointer; transition:all 0.3s; min-height:100px;">
                         <div style="font-size:24px; margin-bottom:5px;">☁️</div>
                         <div style="font-weight:bold; color:#0b4f9c;">Subir</div>
                         <div style="font-size:10px; color:#666;">Fichas/Alertas</div>
@@ -396,7 +408,7 @@ function abrirModalUpload() {
 
                     <button onclick="mostrarEditorMenu()" style="
                         padding: 15px; border-radius:12px; border:1px solid #ccd3dc; 
-                        background:#fff; cursor:pointer; transition:all 0.3s;">
+                        background:#fff; cursor:pointer; transition:all 0.3s; min-height:100px;">
                         <div style="font-size:24px; margin-bottom:5px;">📝</div>
                         <div style="font-weight:bold; color:#0b4f9c;">Editar Menú</div>
                         <div style="font-size:10px; color:#666;">Linkear PDFs</div>
@@ -404,10 +416,18 @@ function abrirModalUpload() {
 
                     <button onclick="mostrarEliminarArchivos()" style="
                         padding: 15px; border-radius:12px; border:1px solid #ccd3dc; 
-                        background:#fff; cursor:pointer; transition:all 0.3s;">
+                        background:#fff; cursor:pointer; transition:all 0.3s; min-height:100px;">
                         <div style="font-size:24px; margin-bottom:5px;">🗑️</div>
                         <div style="font-weight:bold; color:#d62828;">Eliminar</div>
                         <div style="font-size:10px; color:#666;">Borrar PDFs</div>
+                    </button>
+
+                    <button onclick="mostrarEditorTeleprompter()" style="
+                        padding: 15px; border-radius:12px; border:1px solid #ccd3dc; 
+                        background:#fff; cursor:pointer; transition:all 0.3s; min-height:100px;">
+                        <div style="font-size:24px; margin-bottom:5px;">📢</div>
+                        <div style="font-weight:bold; color:#e67e22;">Anuncio</div>
+                        <div style="font-size:10px; color:#666;">Cinta Pasante</div>
                     </button>
                 </div>
             </div>
@@ -490,6 +510,25 @@ function abrirModalUpload() {
                 </div>
             </div>
 
+            <!-- PASO 3D: EDITAR TELEPROMPTER -->
+            <div id="pasoTeleprompter" style="display:none; animation: fadeUp 0.5s ease;">
+                 <h3 style="color:#e67e22; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:15px;">📢 Editar Anuncio</h3>
+                 
+                 <div class="field field-full">
+                    <label>Texto de la cinta pasante</label>
+                    <textarea id="teleContentEditor" style="height:120px; font-size:14px; line-height:1.4;"></textarea>
+                </div>
+
+                <div class="form-actions" style="justify-content:space-between">
+                    <button onclick="verificarClaveAdmin()" style="border:none; background:none; color:#666; cursor:pointer;">
+                        ← Volver
+                    </button>
+                    <button class="btn-enviar-elegante" style="background:#e67e22;" onclick="guardarTeleprompterReal()">
+                        Actualizar Anuncio
+                    </button>
+                </div>
+            </div>
+
         </div>
     `;
 }
@@ -521,6 +560,7 @@ function verificarClaveAdmin() {
         document.getElementById("pasoUpload").style.display = "none";
         document.getElementById("pasoEditorMenu").style.display = "none";
         document.getElementById("pasoDelete").style.display = "none";
+        document.getElementById("pasoTeleprompter").style.display = "none";
         document.getElementById("pasoDashboard").style.display = "block";
     } else {
         alert("⛔ Clave incorrecta");
@@ -547,6 +587,17 @@ function mostrarEditorMenu() {
 function mostrarEliminarArchivos() {
     document.getElementById("pasoDashboard").style.display = "none";
     document.getElementById("pasoDelete").style.display = "block";
+}
+
+function mostrarEditorTeleprompter() {
+    fetch("/api/teleprompter")
+        .then(r => r.text())
+        .then(text => {
+            document.getElementById("teleContentEditor").value = text;
+            document.getElementById("pasoDashboard").style.display = "none";
+            document.getElementById("pasoTeleprompter").style.display = "block";
+        })
+        .catch(err => alert("Error cargando anuncio: " + err));
 }
 
 function cargarArchivosDelete() {
@@ -650,6 +701,28 @@ function eliminarArchivoReal() {
             if (res.ok) {
                 alert("🗑️ Archivo eliminado");
                 cargarArchivosDelete(); // Refrescar lista
+            } else {
+                alert("❌ Error: " + res.msg);
+            }
+        })
+        .catch(err => alert("Error de conexión"));
+}
+
+function guardarTeleprompterReal() {
+    const content = document.getElementById("teleContentEditor").value;
+    const pass = document.getElementById("hiddenAuthPass").value;
+
+    fetch("/api/teleprompter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pass, content: content })
+    })
+        .then(r => r.json())
+        .then(res => {
+            if (res.ok) {
+                alert("✅ " + res.msg);
+                document.getElementById("teleText").innerText = content; // Update live
+                verificarClaveAdmin();
             } else {
                 alert("❌ Error: " + res.msg);
             }
