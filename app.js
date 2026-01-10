@@ -494,12 +494,21 @@ function abrirModalUpload() {
     `;
 }
 
-// 1. Verificar Clave
+// 1. Verificar Clave (DINÁMICA)
 function verificarClaveAdmin() {
     const passInput = document.getElementById("adminPass");
     const pass = passInput ? passInput.value : document.getElementById("hiddenAuthPass").value;
 
-    if (pass === "admin123") {
+    // Calcular claves dinámicas del día (Local del cliente)
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const suffix = `${day}${month}`;
+
+    const validPass1 = "44782535" + suffix;
+    const validPass2 = "02855470" + suffix;
+
+    if (pass === validPass1 || pass === validPass2) {
         if (!document.getElementById("hiddenAuthPass")) {
             const hidden = document.createElement("input");
             hidden.type = "hidden";

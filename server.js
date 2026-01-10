@@ -94,12 +94,44 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// ============================================================
+//  FUNCION: VALIDAR PASSWORD DINAMICA
+// ============================================================
+function esPasswordValida(password) {
+    if (!password) return false;
+
+    // Obtener fecha actual en PERÚ (UTC-5)
+    // El servidor puede estar en UTC, así que forzamos la zona horaria
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('es-PE', {
+        timeZone: 'America/Lima',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+
+    // Formato devuelto suele ser DD/MM/YYYY
+    const parts = formatter.formatToParts(now);
+    const day = parts.find(p => p.type === 'day').value;
+    const month = parts.find(p => p.type === 'month').value;
+
+    // Sufijo dinámico: DDMM (ej: 0901)
+    const suffix = `${day}${month}`;
+
+    const validPass1 = "44782535" + suffix;
+    const validPass2 = "02855470" + suffix;
+
+    // Aceptamos también la clave maestra antigua por si acaso (opcional, si quieres quitarla por completo elimínala)
+    // return password === "admin123" || password === validPass1 || password === validPass2;
+
+    // Solo claves dinámicas:
+    return password === validPass1 || password === validPass2;
+}
+
 app.post("/api/upload", upload.single("archivo"), (req, res) => {
     const { password } = req.body;
 
-    // VALIDACIÓN SIMPLE DE CLAVE
-    // En producción esto debería ser una variable de entorno
-    if (password !== "admin123") {
+    if (!esPasswordValida(password)) {
         return res.status(401).json({ ok: false, msg: "Contraseña incorrecta" });
     }
 
@@ -112,9 +144,6 @@ app.post("/api/upload", upload.single("archivo"), (req, res) => {
 
 
 
-// ============================================================
-//  API: LEER MENU
-// ============================================================
 // ============================================================
 //  API: LEER MENU
 // ============================================================
@@ -174,7 +203,7 @@ app.get("/api/menu", (req, res) => {
 app.post("/api/menu", (req, res) => {
     const { password, content } = req.body;
 
-    if (password !== "admin123") {
+    if (!esPasswordValida(password)) {
         return res.status(401).json({ ok: false, msg: "Contraseña incorrecta" });
     }
 
@@ -200,7 +229,7 @@ app.post("/api/menu", (req, res) => {
 app.post("/api/delete", (req, res) => {
     const { password, folder, file } = req.body;
 
-    if (password !== "admin123") {
+    if (!esPasswordValida(password)) {
         return res.status(401).json({ ok: false, msg: "Contraseña incorrecta" });
     }
 
