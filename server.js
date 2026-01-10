@@ -195,6 +195,55 @@ app.post("/api/menu", (req, res) => {
 
 
 // ============================================================
+//  API: ELIMINAR ARCHIVO
+// ============================================================
+app.post("/api/delete", (req, res) => {
+    const { password, folder, file } = req.body;
+
+    if (password !== "admin123") {
+        return res.status(401).json({ ok: false, msg: "Contraseña incorrecta" });
+    }
+
+    const allowed = ["Fichas", "Alertas", "Boletines"];
+    if (!allowed.includes(folder)) {
+        return res.status(400).json({ ok: false, msg: "Carpeta no válida" });
+    }
+
+    const folderPath = encontrarCarpetaReal(folder);
+    if (!folderPath) {
+        return res.status(404).json({ ok: false, msg: "Carpeta física no encontrada" });
+    }
+
+    // Sanitizar nombre de archivo para evitar Path Traversal
+    const safeFile = path.basename(file);
+    const filePath = path.join(folderPath, safeFile);
+
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ ok: false, msg: "Archivo no existe" });
+    }
+
+    try {
+        fs.unlinkSync(filePath);
+        res.json({ ok: true, msg: "Archivo eliminado correctamente" });
+    } catch (err) {
+        console.error("Error eliminando:", err);
+        res.status(500).json({ ok: false, msg: "Error al eliminar archivo" });
+    }
+});
+
+// ============================================================
+//  API: LISTAR ARCHIVOS (GENÉRICO)
+// ============================================================
+app.get("/api/list", (req, res) => {
+    const folder = req.query.folder;
+    const allowed = ["Fichas", "Alertas", "Boletines"];
+
+    if (!allowed.includes(folder)) return res.json([]);
+
+    listarPDFs(res, folder);
+});
+
+// ============================================================
 //  FICHAS EPIDEMIOLOGICAS Y ALERTAS (Mejorado)
 // ============================================================
 function encontrarCarpetaReal(nombreBuscado) {
