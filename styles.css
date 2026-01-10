@@ -623,27 +623,3 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 10px 26px rgba(11, 79, 156, .55);
 }
-
-
-/* MODAL / UPDATE MENU */
-#btnEditMenu {
-    position: fixed;
-    bottom: 20px;
-    left: 135px;
-    font-size: 24px;
-    cursor: pointer;
-    background: white;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    z-index: 5000;
-    transition: transform 0.2s;
-}
-
-#btnEditMenu:hover {
-    transform: scale(1.1);
-}
